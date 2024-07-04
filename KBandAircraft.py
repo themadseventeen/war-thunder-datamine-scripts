@@ -6,44 +6,24 @@ import json
 import pandas as pd
 import utils
 
-
-def detects_K_band(data):
-    if data.get("type") == "rwr":
-        if data.get("band10") == True:
+def has_Krwr(data):
+    rwrs = utils.get_rwrs(data)
+    for r in rwrs:
+        bands = utils.rwr_bands(r)
+        if bands[10] == 1:
             return True
     return False
-    
-def has_Krwr(data, rwrs):
-    sensors = data.get("sensors")
-    if sensors != None:
-        for s in sensors.get("sensor"):
-            if isinstance(s, dict):
-                sensor = os.path.splitext(os.path.basename(s['blk']))[0]
-                if sensor in rwrs:
-                    return True
 
 def get_aircraft():
-    rwrs = []
     aircraft = set()
-    sensors_dir = utils.archive.get_file("sensors_dir")
-    fm_dir =      utils.archive.get_file("flightmodel_dir")
-
-    for filename in os.listdir(sensors_dir):
-        f = os.path.join(sensors_dir, filename)
-        if os.path.isfile(f):
-            data = utils.read_blkx(f)
-            sensor_name = os.path.splitext(os.path.basename(f))[0]
-
-            if detects_K_band(data):
-                rwrs.append(sensor_name)
-
+    fm_dir = utils.archive.get_file("flightmodel_dir")
 
     for filename in os.listdir(fm_dir):
         f = os.path.join(fm_dir, filename)
         if os.path.isfile(f):
             aircraft_name = os.path.splitext(os.path.basename(f))[0]
             data = utils.read_blkx(f)
-            if has_Krwr(data, rwrs):
+            if has_Krwr(data):
                 aircraft.add(aircraft_name)
     return aircraft
 

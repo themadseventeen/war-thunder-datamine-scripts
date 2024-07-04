@@ -9,7 +9,8 @@ class datamine:
     files = {
         "localization_units" : os.path.join('lang.vromfs.bin_u', 'lang', 'units.csv'),
         "flightmodel_dir"    : os.path.join('aces.vromfs.bin_u', 'gamedata', 'flightmodels'),
-        "sensors_dir"        : os.path.join('aces.vromfs.bin_u', 'gamedata', 'sensors')
+        "sensors_dir"        : os.path.join('aces.vromfs.bin_u', 'gamedata', 'sensors'),
+        "aces"               : os.path.join('aces.vromfs.bin_u')
     
     }
     def __init__(self, datamine_path):
@@ -52,3 +53,45 @@ def localized_unit(string):
     if lstring == "":
         lstring = string
     return lstring
+
+# FM related
+
+def get_sensors(fm_blkx):
+    ret = []
+    sensors_dict = fm_blkx.get("sensors")
+    if sensors_dict != None:
+        sensors = sensors_dict.get("sensor")
+        if isinstance(sensors, list): # multiple sensors
+            # print("TYPE : list")
+            # print(sensors)
+            for s in sensors:
+                # print(s)
+                ret.append(s)
+        elif isinstance(sensors, dict): # one sensor
+            # print("TYPE : dict")
+            # print(sensors)
+            ret.append(sensors)
+    return ret
+
+def get_rwrs(fm_blkx):
+    ret = []
+    sensors = get_sensors(fm_blkx)
+    for s in sensors:
+        path = os.path.join(archive.get_file('aces'), s['blk'].lower()) + 'x'
+        blk = read_blkx(path)
+        if blk.get("type") == "rwr":
+            ret.append(blk)
+    cockpit = fm_blkx.get("cockpit")
+    if cockpit != None:
+        rwr = cockpit.get("rwr")
+        if rwr != None:
+            # print(rwr)
+            ret.append(rwr)
+    return ret
+
+def rwr_bands(rwr):
+    ret = [0] * 16
+    for i in range(16):
+        if rwr.get("band" + str(i)) != None:
+            ret[i] = 1
+    return ret
