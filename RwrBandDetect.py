@@ -6,7 +6,7 @@ import json
 import pandas as pd
 import utils
 
-def has_Krwr(data):
+def has_band(data, band):
     rwrs = utils.get_rwrs(data)
     for r in rwrs:
         bands = utils.rwr_bands(r)
@@ -14,7 +14,7 @@ def has_Krwr(data):
             return True
     return False
 
-def get_aircraft():
+def get_aircraft(band):
     aircraft = set()
     fm_dir = utils.archive.get_file("flightmodel_dir")
 
@@ -23,14 +23,18 @@ def get_aircraft():
         if os.path.isfile(f):
             aircraft_name = os.path.splitext(os.path.basename(f))[0]
             data = utils.read_blkx(f)
-            if has_Krwr(data):
+            if has_band(data, band):
                 aircraft.add(aircraft_name)
     return aircraft
 
 def main():
     utils.archive_init(sys.argv[1])
+    band = sys.argv[2];
+    if (len(band) != 1 or (band < 'A' or band > 'Z')):
+        print("Input a band in it's uppercase letter form (A, B, C...)")
+        return
 
-    aircraft = get_aircraft()
+    aircraft = get_aircraft(band)
     for a in aircraft:
         print(utils.localized_unit(a))
 
