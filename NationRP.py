@@ -22,6 +22,12 @@ for key in wpcost.keys():
     if wpcost[key].get("value") == None or wpcost[key].get("value") == 0:
         reqExp[key] = 0
         continue
+    if wpcost[key].get("gift") != None:
+        reqExp[key] = 0
+        continue
+    if wpcost[key].get("researchType") == "clanVehicle":
+        reqExp[key] = 0
+        continue   
     reqExp[key] = wpcost[key].get("reqExp")
 
 shop_path = os.path.join(datamine_dir, 'char.vromfs.bin_u', 'config', 'shop.blkx');
